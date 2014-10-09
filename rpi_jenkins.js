@@ -5,7 +5,7 @@ var jenkinsapi = require('jenkins-api');
 //using https://github.com/jansepar/node-jenkins-api
 
 
-var jenkins = jenkinsapi.init("http://RaspPi:steel2000@macmini001:8080");
+var jenkins = jenkinsapi.init("http://RaspPi:XXXXXXXXX@xxxx:8080");
 var backpackBeaconPin = 7;
 var lastResult = 'SUCCESS'
 
@@ -13,8 +13,14 @@ var lastResult = 'SUCCESS'
 
 setInterval(function () {
     
+	jenkins.last_result('job-in-jenkins', function(err, data) {
+  if (err){ return console.log(err); }
+  console.log(data)
+});
+
+
 	jenkins.last_build_info('backpackTracker-Develop', function(err, data) {
-	  if (err){ return console.log(err); } //what I shoudl do here is have a different light turn on... :-)
+	  if (err){ return console.log(err); } //TODO: Have a different light turn on... :-)
 
 	  //parsedData = JSON.parse(data);
 	  //console.log(data['result']);
