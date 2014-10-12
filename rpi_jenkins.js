@@ -1,9 +1,10 @@
 var gpio = require("pi-gpio");
 var jenkinsapi = require('jenkins-api');
+var config = require('./config')
 
 //more info https://github.com/jansepar/node-jenkins-api
 
-var jenkins = jenkinsapi.init("http://RaspPi:steel2000@macmini001:8080");
+var jenkins = jenkinsapi.init(config.jenkins.host);
 var backpackBeaconPin = 7;
 var lastResult = 'SUCCESS';
 var result = 'SUCCESS';
@@ -20,6 +21,7 @@ setInterval(function () {
 	  data.forEach(function(item, index) {
 		jenkins.last_build_info(item.name, function(err, data) {
 		  if (err){ return console.log(err); }  //TODO: Have a different light turn on... :-)
+		  //console.log(item.name + "--" + data['result'])
 		  if (data['result'] != 'SUCCESS') {
 		  	result = 'FAILURE'
 		  }
