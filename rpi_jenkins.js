@@ -1,34 +1,38 @@
 var gpio = require("pi-gpio");
 var jenkinsapi = require('jenkins-api');
+var config = require('./config')
 
+//more info https://github.com/jansepar/node-jenkins-api
 
-//using https://github.com/jansepar/node-jenkins-api
-
-
-var jenkins = jenkinsapi.init("http://RaspPi:XXXXXXXXX@xxxx:8080");
+var jenkins = jenkinsapi.init(config.jenkins.host);
 var backpackBeaconPin = 7;
-var lastResult = 'SUCCESS'
+var lastResult = 'SUCCESS';
+var result = 'SUCCESS';
 
 //TODO: run the first check before the setInterval
 
+
 setInterval(function () {
     
-	jenkins.last_result('job-in-jenkins', function(err, data) {
-  if (err){ return console.log(err); }
-  console.log(data)
-});
 
+	jenkins.all_jobs(function(err, data) {
+	  if (err){ return console.log(err); }
+	  
+	  data.forEach(function(item, index) {
+		jenkins.last_build_info(item.name, function(err, data) {
+		  if (err){ return console.log(err); }  //TODO: Have a different light turn on... :-)
+		  //console.log(item.name + "--" + data['result'])
+		  if (data['result'] != 'SUCCESS') {
+		  	result = 'FAILURE'
+		  }
+		});		
 
-	jenkins.last_build_info('backpackTracker-Develop', function(err, data) {
-	  if (err){ return console.log(err); } //TODO: Have a different light turn on... :-)
+	  });
 
-	  //parsedData = JSON.parse(data);
-	  //console.log(data['result']);
-	  //console.log(data);
-	  var result = data['result'];
-	  if (lastResult != result) {
+	});
+
+	if (lastResult != result) {
 	  	lastResult = result;
-		  //console.log(result=='SUCCESS');
 		  if (result == 'SUCCESS') {
 			gpio.open(backpackBeaconPin, "output", function(err) {     // Open pin 16 for output
 	    		gpio.write(backpackBeaconPin, 0, function() {          // Set pin 16 high (1) (1 is on and 0 is off - seems logical)
@@ -42,8 +46,9 @@ setInterval(function () {
 	    			});
 	    		});
 		  }
-		}
-	});
+		};
+
+
 
 }, 10000);
 
