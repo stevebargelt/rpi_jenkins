@@ -28,4 +28,4 @@ node_modules
 .lock-wscript
 
 #config file (can contain sensitive data)
-config.js
+#config.js
